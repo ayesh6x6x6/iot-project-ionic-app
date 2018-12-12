@@ -79,29 +79,32 @@ export class MapPage implements OnInit {
           lng: this.lng
         }
       });
-      let htmlInfoWindow = new HtmlInfoWindow();
+      // let htmlInfoWindow = new HtmlInfoWindow();
 
-      let frame: HTMLElement = document.createElement('div');
-      frame.innerHTML = [
-        '<h3>Your current location</h3>'
-      ].join("");
-      frame.getElementsByTagName("h3")[0].addEventListener("click", () => {
-        htmlInfoWindow.setBackgroundColor('red');
-      });
-      htmlInfoWindow.setContent(frame, {
-        width: "280px",
-        height: "330px"
-      });
+      // let frame: HTMLElement = document.createElement('div');
+      // frame.innerHTML = [
+      //   '<h3>Your current location</h3>'
+      // ].join("");
+      // frame.getElementsByTagName("h3")[0].addEventListener("click", () => {
+      //   htmlInfoWindow.setBackgroundColor('red');
+      // });
+      // htmlInfoWindow.setContent(frame, {
+      //   width: "280px",
+      //   height: "330px"
+      // });
 
-      htmlInfoWindow.open(marker);
+      // htmlInfoWindow.open(marker);
 
       console.log('Inside init');
       //initializing the bins array with all bins from the database
       this.http.get('http://192.168.1.128:3000/getbins',{},{}).then(response=>{
         console.log(response.data);
-        this.bins = _.uniqBy(response.data,'bin_id');
+        this.bins = response.data;
         console.log(this.bins);
+        this.bins = JSON.parse(this.bins);
         this.bins.forEach(bin=>{
+          console.log('Inside a bin no.:'+bin.bin_id);
+          console.log('Bin lat:'+bin.lat);
           let marker: Marker = this.map.addMarkerSync({
             title: bin.bin_id,
             icon: 'blue',
@@ -109,6 +112,40 @@ export class MapPage implements OnInit {
             position: {
               lat: bin.lat,
               lng: bin.lng
+            }
+          });
+          // let htmlInfoWindow = new HtmlInfoWindow();
+    
+          // let frame: HTMLElement = document.createElement('div');
+          // frame.innerHTML = [
+          //   '<h3>Hearst Castle</h3>'
+          // ].join("");
+          // frame.getElementsByTagName("h3")[0].addEventListener("click", () => {
+          //   htmlInfoWindow.setBackgroundColor('red');
+          // });
+          // htmlInfoWindow.setContent(frame, {
+          //   width: "280px",
+          //   height: "330px"
+          // });
+    
+          // htmlInfoWindow.open(marker);
+          // marker.on(GoogleMapsEvent.MARKER_CLICK).subscribe(() => {
+          //   alert('clicked');
+          // });
+        });
+      });
+  
+      //getting all locations marked by users using their watches from the database through the server
+      this.http.get('http://192.168.1.128:3000/getpins',{},{}).then(response=>{  
+        this.pins = response.data;
+        this.pins.forEach(pin=>{
+          let marker: Marker = this.map.addMarkerSync({
+            title: pin.name,
+            icon: 'blue',
+            animation: 'DROP',
+            position: {
+              lat: pin.lat,
+              lng: pin.lng
             }
           });
           let htmlInfoWindow = new HtmlInfoWindow();
@@ -130,11 +167,6 @@ export class MapPage implements OnInit {
             alert('clicked');
           });
         });
-      });
-  
-      //getting all locations marked by users using their watches from the database through the server
-      this.http.get('http://192.168.1.128:3000/getpins',{},{}).then(response=>{  
-        this.pins = response.data;
         console.log(this.pins);
       });
      }).catch((error) => {
